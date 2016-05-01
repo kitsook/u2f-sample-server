@@ -42,7 +42,7 @@ You can then simulate:
 - Authenticate with the server using the token.
 
 You will be able to see the U2F messages passed between the server and token.
-![screenshot](https://3.bp.blogspot.com/-wKHw9zu5T5w/VyWV4H8ggPI/AAAAAAAACek/wd4tFYuwT5s5tVQFamU3B0mL13QYbHxqACLcB/s320/screenshot01.png "screenshot")
+![screenshot](https://3.bp.blogspot.com/-wKHw9zu5T5w/VyWV4H8ggPI/AAAAAAAACek/wd4tFYuwT5s5tVQFamU3B0mL13QYbHxqACLcB/s1600/screenshot01.png "screenshot")
 
 ### Registration
 
