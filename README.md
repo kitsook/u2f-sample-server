@@ -6,7 +6,7 @@ A simple node.js server setup to demonstrate the [Fido U2F authentication](https
 Installation
 ------------
 
-Make sure you have node.js install on your machine.  Pull the source code from github and install the dependencies
+Make sure you have node.js install on your machine.  Clone the source code from github and install the dependencies
 
 ```
 npm install
