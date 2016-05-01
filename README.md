@@ -1,7 +1,7 @@
 u2f-sample-server
 ==================
 
-A simple node.js server setup to demonstrate the [Fido U2F authentication](https://fidoalliance.org/adoption/videos/).
+A simple node.js server setup to demonstrate the [Fido U2F authentication](https://fidoalliance.org/about/overview/).
 
 Installation
 ------------
