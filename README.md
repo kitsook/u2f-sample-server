@@ -63,6 +63,16 @@ To simulate an authentication event, click on the button next to a particular ke
 
 Note that in real life the token is used as a two-factor authentication device.  So normally the server will trigger such authentication after the initial user/password authentication.
 
+*If your token failed to process the authentication challenge, try to modify [node-u2flib-server](https://github.com/kitsook/node-u2flib-server/blob/master/lib/u2f.js#L195) to change the base64 encoded string*
+
+```
+var base64_to_RFC4648 = function(input) {
+  // RFC 4648 uses '-' instead of '+', and '_' instead of '/'.
+  // Also remove the padding '='
+  return input.replace(/\+/g, '-').replace(/\//g, '_').replace(/\=/g, '');
+}
+```
+
 ### !!! Caution !!!
 
 Note that each registration requires a new key pair from the token.  Some tokens can generate infinite number of key pairs by using key-wrapping or deterministic algorithm (e.g. [Yubico's U2F tokens](https://www.yubico.com/2014/11/yubicos-u2f-key-wrapping/)).
