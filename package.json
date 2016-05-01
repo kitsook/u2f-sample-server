@@ -1,0 +1,19 @@
+{
+  "name": "u2f-sample-server",
+  "version": "1.0.0",
+  "description": "Sample server to test u2f",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "dependencies": {
+    "express": "^4.13.4",
+    "express-session": "^1.13.0",
+    "fs": "0.0.2",
+    "https": "^1.0.0",
+    "node-u2flib-server": "^0.2.2",
+    "pug": "^2.0.0-alpha6"
+  },
+  "repository": ""
+}

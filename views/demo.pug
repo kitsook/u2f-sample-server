@@ -1,0 +1,159 @@
+doctype html
+//
+  Copyright (c) 2016 Clarence Ho (clarenceho at gmail dot com)
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+
+html
+  head
+    meta(charset="utf-8")
+    link(rel="stylesheet" href="css/demo.css")
+    link(rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css")
+
+    title U2F Demo Application
+
+    script(src="//code.jquery.com/jquery-2.2.3.min.js")
+    script(src="//code.jquery.com/ui/1.11.4/jquery-ui.js")
+    script(src="js/u2f-api.js")
+    script(src="js/util.js")
+
+    script.
+      var U2F_TIMEOUT_SEC = 30;   // U2F API call timeout in sec
+      var logger;
+
+      // Request a registration challenge from server.
+      // In real life, the token registration action is triggered by server.
+      function beginEnroll() {
+        $.getJSON("#{BEGIN_ENROLL_ADDR_KEY}", function(challenge) {
+          logMsg(logger, "Received challenge:\n" + JSON.stringify(challenge, null, "\t"));
+          logMsg(logger, "Calling the token for registration. Please press the button on the U2F token");
+
+          // Here we always ask the token to generate a new key pair for registration.
+          // So we are not passing any registeredKeys parameter.
+          // In real life, you will want to prevent a user registers the same token more than once.
+          u2f.register(challenge.appId, [challenge], [], function(data) {
+            logU2FResponse(logger, data);
+            if (!isU2fError(data)) {
+              logMsg(logger, "Calling server to finish the registration...");
+              finishEnroll(data);
+            }
+          }, U2F_TIMEOUT_SEC);
+        });
+      }
+
+      // Send the token response to server for validation and storage
+      function finishEnroll(deviceResponse) {
+        $.getJSON("#{FINISH_ENROLL_ADDR_KEY}",
+          deviceResponse,
+          function(deviceReg) {
+            if (deviceReg.code != 0) {
+              logErr(logger, "Registration failed with code " + deviceReg.code);
+            }
+            logMsg(logger, "Registration data stored on server:\n" + JSON.stringify(deviceReg, null, "\t"));
+            logMsg(logger, "Note that normally the server won't send the registration data back to client");
+
+            $("#keycontainer").find("tbody")
+              .append($("<tr>")
+                .append($("<td>")
+                  .text(deviceReg.registration.keyHandle)
+                )
+                .append($("<td>")
+                  .append($("<button>")
+                    .click(function (e) {
+                      beginAuthen(deviceReg.registration.keyHandle)
+                    })
+                    .text("Simulate Authentication")
+                  )
+                )
+              );
+          }
+        );
+      }
+
+      // Request a challenge from server for authentication.
+      // In real life, server will initiate such challenge after the initial authentication (e.g. username-password)
+      function beginAuthen(keyHandle) {
+        $.getJSON(
+          "#{BEGIN_AUTHEN_ADDR_KEY}",
+          { keyHandle: keyHandle },
+          function(startAuthen) {
+            logMsg(logger, "Received authentication challenge:\n" + JSON.stringify(startAuthen, null, "\t"));
+            logMsg(logger, "Calling the token to sign the challenge.  Please press the button on the U2F token");
+
+            // call U2F API to generate response for the challenge
+            u2f.sign(startAuthen.appId, startAuthen.challenge,
+              [ { version: startAuthen.version, keyHandle: startAuthen.keyHandle } ],
+              function(data) {
+                logU2FResponse(logger, data);
+                if (!isU2fError(data)) {
+                  logMsg(logger, "Calling server to finish the authentication...");
+                  finishAuthen(data);
+                }
+              }, U2F_TIMEOUT_SEC);
+          });
+      }
+
+      // Send the authentication response to server for validation
+      function finishAuthen(signResponse) {
+      $.getJSON("#{FINISH_AUTHEN_ADDR_KEY}",
+        signResponse,
+        function(authenResult) {
+          if (authenResult.code != 0) {
+            logErr(logger, "Authentication failed with code " + authenResult.code);
+          } else {
+            logMsg(logger, "Authentication success!!");
+          }
+
+          // In real life application, the counter should be persisted and
+          // verified it is incremented to detect cloning of the token
+          logMsg(logger, "Authentication result: " + JSON.stringify(authenResult, null, "\t"));
+        }
+      );
+
+      }
+
+
+      $(document).ready(function() {
+        logger = $("#logger");
+
+         $("#wrapper").resizable();
+      });
+
+
+  body
+    h1  U2F Demo Application
+
+    button(onclick="beginEnroll();") Simulate server requests token registration
+    p/
+
+    p Key handles of registered token will be shown here.  For this demo, you can register the same token multiple times.
+    table#keycontainer.keylist
+      thead
+        tr
+          th
+            div.keyHandle
+              |Key Handles
+          th
+            |Simulate Authenticate
+      tbody
+    p/
+
+    p Messages:
+    div.wrapper(id="wrapper")
+      div.logger(id="logger")
