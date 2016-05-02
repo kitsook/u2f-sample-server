@@ -1,0 +1,57 @@
+div.description
+{
+  width: 800px;
+}
+
+div.input
+{
+  width: 800px;
+  border: 1px solid black;
+  padding: 10px 10px 10px 10px;
+}
+
+.errMsg
+{
+  color: red;
+}
+
+.errMsg p
+{
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+input.challengeText
+{
+  width: 400px;
+}
+
+input.roundText
+{
+  width:100px;
+}
+
+div.wrapper
+{
+  width: 800px;
+  height: 500px;
+}
+
+div.logger
+{
+  width: 100%;
+  height: 100%;
+  overflow: scroll;
+  border: 1px solid black;
+  font-family: 'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace;
+  font-size: 12px;
+  font-weight: normal;
+  white-space: pre;
+}
+
+p.log-msg
+{
+  color: black;
+  margin-top: 1px;
+  margin-bottom: 1px;
+}

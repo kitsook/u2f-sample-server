@@ -1,0 +1,175 @@
+doctype html
+//
+  Copyright (c) 2016 Clarence Ho (clarenceho at gmail dot com)
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+
+html
+  head
+    meta(charset="utf-8")
+    link(rel="stylesheet" href="css/loop.css")
+    link(rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css")
+
+    title U2F Demo Application
+
+    script(src="//code.jquery.com/jquery-2.2.3.min.js")
+    script(src="//code.jquery.com/ui/1.11.4/jquery-ui.js")
+    script(src="js/u2f-api.js")
+
+    script.
+      var MIN_ROUND = 1;
+      var MAX_ROUND = 32;
+      var U2F_VERION = "U2F_V2";
+      var APP_ID = "https://localhost:4430";
+      var U2F_TIMEOUT_SEC = 30;   // U2F API call timeout in sec
+
+      function generateChallenge() {
+        var array = new Int8Array(32);
+        window.crypto.getRandomValues(array);
+        return Array.prototype.slice.call(array);
+      }
+
+      function toHexString(byteArray) {
+        return byteArray.map(function(byte) {
+          return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+        }).join('')
+      }
+
+      function base64_to_RFC4648(input) {
+        // RFC 4648 uses '-' instead of '+', and '_' instead of '/'.
+        // Also remove the padding '='
+        return input.replace(/\+/g, '-').replace(/\//g, '_').replace(/\=/g, '');
+      }
+
+      function isValidChallengeHex(str) {
+        return /^[0-9a-fA-F]{64}$/.test(str);
+      }
+
+      function isValidRound(round) {
+        return !isNaN(parseFloat(round)) && isFinite(round) && round >= MIN_ROUND && round <= MAX_ROUND;
+      }
+
+      function logErr(msg) {
+        var p = $("<p/>")
+          .appendTo($("#errMsg"));
+        p.text(msg);
+      }
+
+      function logOutput(msg, styleClass="log-msg") {
+        var p = $("<p/>")
+          .addClass(styleClass)
+          .appendTo(logger);
+        p.text(msg);
+
+        $("#logger").scrollTop($("#logger").prop("scrollHeight"));
+      }
+
+      function clearLogErr() {
+        $("#errMsg").empty();
+      }
+
+      function fillChallenge() {
+        $("#txt_fix_challenge").val(toHexString(generateChallenge()));
+      }
+
+      function nextU2fChallenge() {
+        var challenge = $("input[name=rand_challenge]:checked").val() == 0 ?
+          $("#txt_fix_challenge").val() :
+          toHexString(generateChallenge());
+        challenge = window.btoa(String.fromCharCode.apply(null, challenge.replace(/([0-9a-fA-F]{2})/g, "0x$1 ").replace(/ +$/, "").split(" ")));
+        challenge = base64_to_RFC4648(challenge);
+
+        return {
+          version: U2F_VERION,
+          appId: APP_ID,
+          challenge: challenge,
+        };
+      }
+
+      function genKeyPairs() {
+        var invalid = false;
+        clearLogErr();
+
+        if ($("input[name=rand_challenge]:checked").val() == 0 &&
+          !isValidChallengeHex($("#txt_fix_challenge").val())) {
+          logErr("Invalid challenge.");
+          invalid = true;
+        }
+        if (!isValidRound($("#txt_round").val())) {
+          logErr("Invalid number of round. Should be between " + MIN_ROUND + " and " + MAX_ROUND);
+          invalid = true;
+        }
+
+        if (invalid) {
+          return;
+        }
+
+        for (i = 0; i < $("#txt_round").val(); i++) {
+          var nextChallenge = nextU2fChallenge();
+          logOutput(JSON.stringify(nextChallenge));
+
+          u2f.register(APP_ID, [nextChallenge], [], function(data) {
+            logOutput(JSON.stringify(data));
+          }, U2F_TIMEOUT_SEC);
+        }
+
+      }
+
+      $(document).ready(function() {
+        $("input[name=rand_challenge]").change(function() {
+          $("#txt_fix_challenge").prop("disabled", $("input[name=rand_challenge]:checked").val() == 1);
+          $("#btn_gen_challenge").prop("disabled", $("input[name=rand_challenge]:checked").val() == 1);
+        });
+
+        $("#wrapper").resizable();
+      });
+
+  body
+    h1  U2F Loop key pairs
+    div.description Generates challenges to U2F token to create new key pairs.  This is similar to registering the token with a new service.
+    p/
+    div.description
+      b Warning:
+      | Note that some U2F tokens have limited key pair capacity.  Once exhausted, the token cannot be used to register with new services.
+    p/
+
+    div.input
+      p Challenge:
+        br/
+        input(type="radio", name="rand_challenge", value="1", checked)
+        | Unique random for each round
+        br/
+        input(type="radio", name="rand_challenge", value="0")
+        | Fixed&nbsp;
+        input.challengeText(type="text", id="txt_fix_challenge", disabled="disabled")
+        |&nbsp;
+        button(onClick="fillChallenge();" id="btn_gen_challenge" disabled="disabled") New
+        |&nbsp;(32 bytes in hexdecimal format)
+
+      p Number of rounds:&nbsp;
+        input.roundText(type="text", id="txt_round", value="1")
+
+      p
+        button(onClick="genKeyPairs();") Generate Key Pairs
+
+      div.errMsg(id="errMsg")/
+
+    p Results:
+      div.wrapper(id="wrapper")
+        div.logger(id="logger")

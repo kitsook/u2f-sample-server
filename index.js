@@ -154,6 +154,12 @@ app.get("/demo", function(req, res) {
   );
 });
 
+app.get("/loop", function(req, res) {
+  res.render(
+    "loop"
+  );
+});
+
 
 var server = https
   .createServer(credentials, app)
