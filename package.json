@@ -4,6 +4,7 @@
   "description": "Sample server to test u2f",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -12,7 +13,7 @@
     "express-session": "^1.13.0",
     "fs": "0.0.2",
     "https": "^1.0.0",
-    "node-u2flib-server": "^0.2.2",
+    "node-u2flib-server": "git://github.com/emilecantin/node-u2flib-server.git#e78a1864a56ca3c47ec7c950efee0011963e657b",
     "pug": "^2.0.0-alpha6"
   },
   "repository": ""

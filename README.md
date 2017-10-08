@@ -18,18 +18,13 @@ openssl ecparam -genkey -out sslcert/private-key.pem -name prime256v1
 openssl req -x509 -new -key sslcert/private-key.pem -out sslcert/server.pem
 ```
 
-There is a bug in the existing node-u2flib-server module.  You may need to edit the file node_modules/node-u2flib-server/lib/u2f.js and comment out the following line:
-
-```
-//var challengeGenerator = require('./crypto/random_challenge_generator.js');
-```
 
 Usage
 -----
 
 Start the server by running
 ```
-node index.js
+npm start
 ```
 
 The server will start listening on localhost and port 4430 by default.  Point your Chrome / Chromium browser to
