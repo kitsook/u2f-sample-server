@@ -12,7 +12,7 @@ Make sure you have node.js install on your machine.  Clone the source code from 
 npm install
 ```
 
-Note that the demo uses SSL connections. A sample self-signed certificate is included.  You can generate your own self-signed certificate by
+Note that the demo uses https connections. A sample self-signed certificate is included.  You can generate your own self-signed certificate by
 ```
 openssl ecparam -genkey -out sslcert/private-key.pem -name prime256v1
 openssl req -x509 -new -key sslcert/private-key.pem -out sslcert/server.pem
