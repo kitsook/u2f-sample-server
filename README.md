@@ -72,4 +72,4 @@ var base64_to_RFC4648 = function(input) {
 
 Note that each registration requires a new key pair from the token.  Some tokens can generate infinite number of key pairs by using key-wrapping or deterministic algorithm (e.g. [Yubico's U2F tokens](https://www.yubico.com/2014/11/yubicos-u2f-key-wrapping/)).
 
-But some tokens (e.g. the one I have from [HyperFIDO](http://hyperfido.com/)) only support limited number of key pairs (64 pairs for HyperFIDO). Once over the limit, you won't be able to register the token with any new site.  Some vendors do provide a reset program for you to wipe the token though.
+But some tokens (e.g. the one I have from [HyperFIDO](https://hypersecu.com/tmp/products/hyperfido)) only support limited number of key pairs (64 pairs for HyperFIDO). Once over the limit, you won't be able to register the token with any new sites.  Some vendors do provide a reset program for you to wipe the token though.
