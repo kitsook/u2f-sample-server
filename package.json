@@ -14,7 +14,7 @@
     "fs": "0.0.2",
     "https": "^1.0.0",
     "node-u2flib-server": "git://github.com/emilecantin/node-u2flib-server.git#e78a1864a56ca3c47ec7c950efee0011963e657b",
-    "pug": "^2.0.0-alpha6"
+    "pug": "^3.0.2"
   },
   "repository": ""
 }
